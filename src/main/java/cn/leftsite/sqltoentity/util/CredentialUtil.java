@@ -7,10 +7,14 @@ import com.intellij.ide.passwordSafe.PasswordSafe;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
-public class PasswordStoreUtil {
+public class CredentialUtil {
+    private CredentialUtil() {
+    }
+
+    private static final String SUBSYSTEM = "cn.leftsite.sql-to-entity";
+
     private static CredentialAttributes createCredentialAttributes(String key) {
-        String serviceName = CredentialAttributesKt.generateServiceName("cn.leftsite.sql-to-entity", key);
-        System.out.println(serviceName);
+        String serviceName = CredentialAttributesKt.generateServiceName(SUBSYSTEM, key);
         return new CredentialAttributes(serviceName);
     }
 

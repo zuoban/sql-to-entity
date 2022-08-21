@@ -1,9 +1,9 @@
 package cn.leftsite.sqltoentity.action;
 
-import cn.leftsite.sqltoentity.dialog.SampleDialogWrapper;
+import cn.leftsite.sqltoentity.ui.ShowEntityDialog;
 import cn.leftsite.sqltoentity.service.SqlToEntityService;
 import cn.leftsite.sqltoentity.state.AppSettingsState;
-import cn.leftsite.sqltoentity.util.PasswordStoreUtil;
+import cn.leftsite.sqltoentity.util.CredentialUtil;
 import com.intellij.credentialStore.Credentials;
 import com.intellij.notification.NotificationGroupManager;
 import com.intellij.notification.NotificationType;
@@ -20,7 +20,6 @@ import java.util.List;
 
 public class SqlToEntityAction extends AnAction {
 
-    private SqlToEntityService sqlToEntityService;
 
     @Override
     public void actionPerformed(AnActionEvent e) {
@@ -33,19 +32,19 @@ public class SqlToEntityAction extends AnAction {
             return;
         }
 
-        Credentials credentials = PasswordStoreUtil.retrieveCredentials(state.username);
+        Credentials credentials = CredentialUtil.retrieveCredentials(state.username);
         if (credentials == null) {
             showNotification(e.getProject(), "请检查数据库连接配置", NotificationType.ERROR);
             return;
         }
         String password = credentials.getPasswordAsString();
 
-        sqlToEntityService = new SqlToEntityService(state.url, state.username, password);
+        SqlToEntityService sqlToEntityService = new SqlToEntityService(state.url, state.username, password);
 
         try {
             List<String> lines = sqlToEntityService.handle(selectedText);
             String content = StringUtils.join(lines, "\n");
-            new SampleDialogWrapper(content).show();
+            new ShowEntityDialog(content).show();
         } catch (SQLException ex) {
             showNotification(e.getProject(), ex.getMessage(), NotificationType.ERROR);
         }

@@ -1,4 +1,4 @@
-package cn.leftsite.sqltoentity.dialog;
+package cn.leftsite.sqltoentity.ui;
 
 import com.intellij.openapi.ui.DialogWrapper;
 import org.jetbrains.annotations.Nullable;
@@ -8,10 +8,10 @@ import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 
-public class SampleDialogWrapper extends DialogWrapper {
+public class ShowEntityDialog extends DialogWrapper {
     private final String content;
 
-    public SampleDialogWrapper(String content) {
+    public ShowEntityDialog(String content) {
         super(true); // use current window as parent
         this.content = content;
         setTitle("Properties");
@@ -23,7 +23,6 @@ public class SampleDialogWrapper extends DialogWrapper {
     protected JComponent createCenterPanel() {
         JPanel dialogPanel = new JPanel(new BorderLayout());
         JTextArea textArea = new JTextArea(content);
-        //textArea.setPreferredSize(new Dimension(300, 400));
         dialogPanel.add(textArea, BorderLayout.CENTER);
         return dialogPanel;
     }

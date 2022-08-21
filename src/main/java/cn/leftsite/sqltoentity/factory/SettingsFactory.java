@@ -2,7 +2,7 @@ package cn.leftsite.sqltoentity.factory;
 
 import cn.leftsite.sqltoentity.state.AppSettingsState;
 import cn.leftsite.sqltoentity.ui.SettingsUI;
-import cn.leftsite.sqltoentity.util.PasswordStoreUtil;
+import cn.leftsite.sqltoentity.util.CredentialUtil;
 import com.intellij.credentialStore.Credentials;
 import com.intellij.openapi.options.SearchableConfigurable;
 import com.intellij.openapi.util.NlsContexts;
@@ -14,7 +14,7 @@ import javax.swing.*;
 import java.util.Objects;
 
 public class SettingsFactory implements SearchableConfigurable {
-    private SettingsUI settingsUI = new SettingsUI();
+    private final SettingsUI settingsUI = new SettingsUI();
 
     @Override
     public @NotNull @NonNls String getId() {
@@ -22,7 +22,8 @@ public class SettingsFactory implements SearchableConfigurable {
     }
 
     @Override
-    public @NlsContexts.ConfigurableName String getDisplayName() {
+    @NlsContexts.ConfigurableName
+    public String getDisplayName() {
         return "Sql To Entity";
     }
 
@@ -36,7 +37,7 @@ public class SettingsFactory implements SearchableConfigurable {
 
         AppSettingsState state = AppSettingsState.getInstance().getState();
 
-        Credentials credentials = PasswordStoreUtil.retrieveCredentials(state.username);
+        Credentials credentials = CredentialUtil.retrieveCredentials(state.username);
         boolean passwordChanged = false;
         if (credentials != null) {
             passwordChanged = !Objects.equals(credentials.getPasswordAsString(), settingsUI.getPasswordText());
@@ -53,7 +54,7 @@ public class SettingsFactory implements SearchableConfigurable {
         String usernameText = settingsUI.getUsernameText();
         String passwordText = settingsUI.getPasswordText();
         state.username = usernameText;
-        PasswordStoreUtil.storeCredentials(usernameText, passwordText);
+        CredentialUtil.storeCredentials(usernameText, passwordText);
     }
 
     @Override
@@ -62,7 +63,7 @@ public class SettingsFactory implements SearchableConfigurable {
         settingsUI.setUrlText(state.url);
         settingsUI.setUsernameText(state.username);
 
-        Credentials credentials = PasswordStoreUtil.retrieveCredentials(state.username);
+        Credentials credentials = CredentialUtil.retrieveCredentials(state.username);
         if (credentials != null) {
             settingsUI.setPasswordText(credentials.getPasswordAsString());
         }
