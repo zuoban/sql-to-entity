@@ -1,10 +1,7 @@
 package cn.leftsite.sqltoentity.action;
 
-import cn.leftsite.sqltoentity.ui.ShowEntityDialog;
 import cn.leftsite.sqltoentity.service.SqlToEntityService;
-import cn.leftsite.sqltoentity.state.AppSettingsState;
-import cn.leftsite.sqltoentity.util.CredentialUtil;
-import com.intellij.credentialStore.Credentials;
+import cn.leftsite.sqltoentity.ui.ShowEntityDialog;
 import com.intellij.notification.NotificationGroupManager;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.actionSystem.AnAction;
@@ -13,6 +10,7 @@ import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.SelectionModel;
 import com.intellij.openapi.project.Project;
+import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 
 import java.sql.SQLException;
@@ -20,26 +18,13 @@ import java.util.List;
 
 public class SqlToEntityAction extends AnAction {
 
-
+    @SneakyThrows
     @Override
     public void actionPerformed(AnActionEvent e) {
         Editor editor = e.getRequiredData(CommonDataKeys.EDITOR);
         SelectionModel selectionModel = editor.getSelectionModel();
         String selectedText = selectionModel.getSelectedText();
-        AppSettingsState state = AppSettingsState.getInstance();
-        if (StringUtils.isAnyBlank(state.url, state.username)) {
-            showNotification(e.getProject(), "请检查数据库连接配置", NotificationType.ERROR);
-            return;
-        }
-
-        Credentials credentials = CredentialUtil.retrieveCredentials(state.username);
-        if (credentials == null) {
-            showNotification(e.getProject(), "请检查数据库连接配置", NotificationType.ERROR);
-            return;
-        }
-        String password = credentials.getPasswordAsString();
-
-        SqlToEntityService sqlToEntityService = new SqlToEntityService(state.url, state.username, password);
+        SqlToEntityService sqlToEntityService = new SqlToEntityService(e.getProject());
 
         try {
             List<String> lines = sqlToEntityService.handle(selectedText);

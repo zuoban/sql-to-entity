@@ -17,31 +17,28 @@
     根据你的SQL生成相应的实体类，并添加数据库备注作为注释。<br/>
     使用方式: <br/>
     <ol>
-        <li>配置数据库连接信息, Preferences -> Tools -> Sql To Entity </li>
+        <li>在 database 窗口中配置数据库 </li>
         <li>选择要执行的SQL语句</li>
-        <li>右键执行 "Sql to Entity" 按钮</li>
+        <li>右键执行 "Sql to Entity" 按钮。或设置快捷键,"command+shift+,"</li>
     </ol>
   ]]></description>
 
     <!-- Product and plugin compatibility requirements.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.database</depends>
 
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
-        <projectConfigurable groupId="tools" instance="cn.leftsite.sqltoentity.factory.SettingsFactory"/>
-        <projectService serviceImplementation="cn.leftsite.sqltoentity.state.AppSettingsState"/>
-        <notificationGroup id="sql-to-entity.notification.group.id"
-                           displayType="BALLOON"/>
-
+        <notificationGroup id="sql-to-entity.notification.group.id" displayType="BALLOON"/>
     </extensions>
 
 
     <actions>
         <action id="cn.leftsite.sql-to-entity.id" class="cn.leftsite.sqltoentity.action.SqlToEntityAction"
                 text="To Entity" description="Sql to entity">
-            <keyboard-shortcut keymap="$default" first-keystroke="shift meta COMMA"/>
+            <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="shift meta COMMA"/>
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
         </action>
     </actions>
