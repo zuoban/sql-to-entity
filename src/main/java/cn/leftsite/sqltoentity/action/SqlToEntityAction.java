@@ -31,6 +31,7 @@ public class SqlToEntityAction extends AnAction {
             String content = StringUtils.join(lines, "\n");
             new ShowEntityDialog(content).show();
         } catch (SQLException ex) {
+            ex.printStackTrace();
             showNotification(e.getProject(), ex.getMessage(), NotificationType.ERROR);
         }
     }
