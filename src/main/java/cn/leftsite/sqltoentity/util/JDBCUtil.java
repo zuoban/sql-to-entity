@@ -2,6 +2,7 @@ package cn.leftsite.sqltoentity.util;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ReflectUtil;
+import cn.leftsite.sqltoentity.exception.ExecuteException;
 import com.intellij.database.Dbms;
 import com.intellij.database.dataSource.DatabaseConnection;
 import com.intellij.database.dataSource.DatabaseConnectionManager;
@@ -17,6 +18,7 @@ import lombok.Cleanup;
 import lombok.SneakyThrows;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 public class JDBCUtil {
@@ -32,18 +34,14 @@ public class JDBCUtil {
         Map<LocalDataSource, Dbms> dsDbms = (Map<LocalDataSource, Dbms>) ReflectUtil.getFieldValue(structureService, "dsDbms");
 
         if (CollUtil.isEmpty(dsDbms)) {
-            throw new RuntimeException("请先配置数据库连接");
+            throw new ExecuteException("请先配置数据库连接");
         }
 
         LocalDataSource localDatasource = CollUtil.getFirst(dsDbms.keySet());
         // 这里做演示就只使用最后一个数据库连接
         //通过数据库连接管理创建连接
         GuardedRef<DatabaseConnection> connectionGuardedRef = DatabaseConnectionManager.getInstance().build(project, localDatasource).create();
-        // 获取数据库连接
-        if (connectionGuardedRef == null) {
-            throw new RuntimeException("请先配置数据库连接");
-        }
-        return connectionGuardedRef.get().getRemoteConnection();
+        return Objects.requireNonNull(connectionGuardedRef).get().getRemoteConnection();
     }
 
     @SneakyThrows

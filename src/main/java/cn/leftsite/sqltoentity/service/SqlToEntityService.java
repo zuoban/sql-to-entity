@@ -1,6 +1,7 @@
 package cn.leftsite.sqltoentity.service;
 
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.leftsite.sqltoentity.exception.ExecuteException;
 import cn.leftsite.sqltoentity.util.JDBCUtil;
 import com.intellij.database.remote.jdbc.RemoteResultSetMetaData;
 import com.intellij.openapi.project.Project;
@@ -22,10 +23,10 @@ public class SqlToEntityService {
     }
 
     @SneakyThrows
-    public List<String> handle(String sql) throws SQLException {
+    public List<String> handle(String sql) {
         sql = sql.replace("\n", " ");
         sql = StringUtils.removeEnd(sql, ";");
-        return JDBCUtil.execute(project, sql, (resultSet) -> {
+        return JDBCUtil.execute(project, sql,resultSet -> {
             List<String> result = new ArrayList<>();
             try {
                 RemoteResultSetMetaData metaData = resultSet.getMetaData();
@@ -46,11 +47,11 @@ public class SqlToEntityService {
                     if (comment != null && comment.length() > 0) {
                         filedDeclare += "\n/**\n" + " * " + comment + "\n" + " */\n";
                     }
-                    filedDeclare += "private " + columnType + " " + StrUtil.toCamelCase(columnName) + ";";
+                    filedDeclare += "private " + columnType + " " + CharSequenceUtil.toCamelCase(columnName) + ";";
                     result.add(filedDeclare);
                 }
             } catch (RemoteException | SQLException e) {
-                throw new RuntimeException(e);
+                throw new ExecuteException(e);
             }
             return result;
         });
@@ -77,7 +78,7 @@ public class SqlToEntityService {
                     }
                 }
             } catch (RemoteException | SQLException e) {
-                throw new RuntimeException(e);
+                throw new ExecuteException(e);
             }
             return fieldCommentsMap;
         }));
