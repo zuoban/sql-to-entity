@@ -3,8 +3,8 @@ package cn.leftsite.sqltoentity.service;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.leftsite.sqltoentity.exception.ExecuteException;
 import cn.leftsite.sqltoentity.util.JDBCUtil;
+import com.intellij.database.remote.jdbc.RemoteConnection;
 import com.intellij.database.remote.jdbc.RemoteResultSetMetaData;
-import com.intellij.openapi.project.Project;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 
@@ -16,17 +16,16 @@ import java.util.regex.Pattern;
 
 public class SqlToEntityService {
     private static final Pattern PATTERN = Pattern.compile("^\\s*`(.*)`.*COMMENT '(.*)'");
-    private final Project project;
+    private final RemoteConnection remoteConnection;
 
-    public SqlToEntityService(Project project) {
-        this.project = project;
+    public SqlToEntityService(RemoteConnection remoteConnection) {
+        this.remoteConnection = remoteConnection;
     }
 
-    @SneakyThrows
     public List<String> handle(String sql) {
         sql = sql.replace("\n", " ");
         sql = StringUtils.removeEnd(sql, ";");
-        return JDBCUtil.execute(project, sql,resultSet -> {
+        return JDBCUtil.execute(remoteConnection, sql, resultSet -> {
             List<String> result = new ArrayList<>();
             try {
                 RemoteResultSetMetaData metaData = resultSet.getMetaData();
@@ -64,7 +63,7 @@ public class SqlToEntityService {
         }
 
         String sql = "show create table " + tableName;
-        return JDBCUtil.execute(project, sql, (resultSet -> {
+        return JDBCUtil.execute(remoteConnection, sql, (resultSet -> {
             Map<String, String> fieldCommentsMap = new HashMap<>();
             try {
                 if (resultSet.next()) {
