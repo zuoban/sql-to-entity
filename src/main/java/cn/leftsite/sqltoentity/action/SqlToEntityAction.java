@@ -19,6 +19,7 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
+import com.intellij.psi.PsiFile;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -36,12 +37,13 @@ public class SqlToEntityAction extends AnAction {
             Assert.notBlank(selectedText, "Please select the SQL to be executed.");
 
             Project project = e.getProject();
+            PsiFile psiFile = e.getData(CommonDataKeys.PSI_FILE);
             ProgressManager.getInstance().run(new Task.Backgroundable(project, "Sql to entity") {
                 @Override
                 public void run(@NotNull ProgressIndicator indicator) {
                     try {
                         indicator.setText("Obtaining a data connection");
-                        GuardedRef<DatabaseConnection> guardedRef = JDBCUtil.getConnection(project);
+                        GuardedRef<DatabaseConnection> guardedRef = JDBCUtil.getConnection(Objects.requireNonNull(e.getProject()), psiFile);
                         RemoteConnection remoteConnection = Objects.requireNonNull(guardedRef).get().getRemoteConnection();
                         indicator.setText("Processing SQL");
                         perform(remoteConnection, selectedText);
