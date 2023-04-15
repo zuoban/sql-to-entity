@@ -1,26 +1,27 @@
 package cn.leftsite.sqltoentity.util;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.ReflectUtil;
-import cn.leftsite.sqltoentity.exception.ExecuteException;
-import com.intellij.database.Dbms;
+import cn.hutool.core.util.StrUtil;
+import com.intellij.database.console.JdbcConsole;
+import com.intellij.database.console.JdbcConsoleProvider;
 import com.intellij.database.dataSource.DatabaseConnection;
 import com.intellij.database.dataSource.DatabaseConnectionManager;
 import com.intellij.database.dataSource.LocalDataSource;
+import com.intellij.database.model.RawDataSource;
+import com.intellij.database.psi.DataSourceManager;
 import com.intellij.database.remote.jdbc.RemoteConnection;
 import com.intellij.database.remote.jdbc.RemotePreparedStatement;
 import com.intellij.database.remote.jdbc.RemoteResultSet;
 import com.intellij.database.util.GuardedRef;
-import com.intellij.database.view.DatabaseView;
-import com.intellij.database.view.structure.DvTreeStructureService;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.psi.PsiFile;
 import lombok.Cleanup;
 import lombok.SneakyThrows;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashSet;
-import java.util.Map;
+import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -29,23 +30,41 @@ public class JDBCUtil {
     }
 
     @SneakyThrows
-    @SuppressWarnings("unchecked")
-    public static @Nullable GuardedRef<DatabaseConnection> getConnection(Project project) {
-        Set<LocalDataSource> localDataSources = new HashSet<>();
-        // 通过数据库视图获取数据库连接
-        ApplicationManager.getApplication().invokeAndWait(() -> {
-            DatabaseView databaseView = DatabaseView.getDatabaseView(project);
-            DvTreeStructureService structureService = (DvTreeStructureService) ReflectUtil.getFieldValue(databaseView.getPanel(), "myStructureService");
-            Map<LocalDataSource, Dbms> dsDbms = (Map<LocalDataSource, Dbms>) ReflectUtil.getFieldValue(structureService, "dsDbms");
-            if (CollUtil.isEmpty(dsDbms)) {
-                throw new ExecuteException("请先配置数据库连接");
+    public static @Nullable GuardedRef<DatabaseConnection> getConnection(@NotNull Project project, PsiFile psiFile) {
+        JdbcConsole console = null;
+
+        if (psiFile != null) {
+            console = JdbcConsoleProvider.getConsole(project, psiFile.getViewProvider().getVirtualFile());
+        }
+
+        String schema = null;
+        LocalDataSource localDatasource = null;
+        if (console == null) {
+            Set<LocalDataSource> localDataSources = new LinkedHashSet<>();
+            for (DataSourceManager<?> manager : DataSourceManager.getManagers(project)) {
+                for (RawDataSource dataSource : manager.getDataSources()) {
+                    localDataSources.add((LocalDataSource) dataSource);
+                }
             }
-            localDataSources.addAll(dsDbms.keySet());
-        });
+            localDatasource = CollUtil.getLast(localDataSources);
+        } else {
+            localDatasource = console.getDataSource();
+            if (console.getSearchPath() != null && CollUtil.isNotEmpty(console.getSearchPath().elements)) {
+                schema = CollUtil.getFirst(console.getSearchPath().elements).name;
+                if (StrUtil.isNotEmpty(schema)) {
+                    // 设置新的 schema
+                    String jdbcUrl = localDatasource.getUrl();
+                    String newJdbcUrl = Objects.requireNonNull(jdbcUrl).replaceAll("(/)([^/?#&]+)?([?].*)?$", "$1" + schema + "$3");
+                    localDatasource.setUrl(newJdbcUrl);
+                }
 
-
-        LocalDataSource localDatasource = CollUtil.getLast(localDataSources);
-        return DatabaseConnectionManager.getInstance().build(project, localDatasource).create();
+            }
+        }
+        GuardedRef<DatabaseConnection> databaseConnectionGuardedRef = DatabaseConnectionManager.getInstance().build(project, localDatasource).create();
+        if (schema != null) {
+            databaseConnectionGuardedRef.get().getRemoteConnection().setSchema(schema);
+        }
+        return databaseConnectionGuardedRef;
     }
 
     @SneakyThrows
