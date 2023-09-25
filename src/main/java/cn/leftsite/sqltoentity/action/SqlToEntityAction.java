@@ -1,6 +1,5 @@
 package cn.leftsite.sqltoentity.action;
 
-import cn.hutool.core.lang.Assert;
 import cn.leftsite.sqltoentity.service.SqlToEntityService;
 import cn.leftsite.sqltoentity.ui.ShowEntityDialog;
 import cn.leftsite.sqltoentity.util.JDBCUtil;
@@ -21,6 +20,7 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -34,7 +34,7 @@ public class SqlToEntityAction extends AnAction {
             Editor editor = e.getRequiredData(CommonDataKeys.EDITOR);
             SelectionModel selectionModel = editor.getSelectionModel();
             String selectedText = selectionModel.getSelectedText();
-            Assert.notBlank(selectedText, "Please select the SQL to be executed.");
+            Validate.notBlank(selectedText, "Please select the SQL to be executed.");
 
             Project project = e.getProject();
             PsiFile psiFile = e.getData(CommonDataKeys.PSI_FILE);

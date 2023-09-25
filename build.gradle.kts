@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "cn.leftsite"
-version = "1.3"
+version = "1.4"
 
 repositories {
     mavenCentral()
@@ -20,7 +20,6 @@ intellij {
 }
 
 dependencies {
-    "implementation"("cn.hutool:hutool-all:5.8.12")
 }
 
 tasks {
@@ -32,7 +31,7 @@ tasks {
 
     patchPluginXml {
         sinceBuild.set("213")
-        untilBuild.set("231.*")
+        untilBuild.set("232.*")
     }
 
     signPlugin {

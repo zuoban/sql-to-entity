@@ -1,8 +1,8 @@
 package cn.leftsite.sqltoentity.service;
 
-import cn.hutool.core.text.CharSequenceUtil;
 import cn.leftsite.sqltoentity.exception.ExecuteException;
 import cn.leftsite.sqltoentity.util.JDBCUtil;
+import com.google.common.base.CaseFormat;
 import com.intellij.database.remote.jdbc.RemoteConnection;
 import com.intellij.database.remote.jdbc.RemoteResultSetMetaData;
 import lombok.SneakyThrows;
@@ -43,10 +43,11 @@ public class SqlToEntityService {
                     Map<String, String> fieldComments = getFieldComments(tableName);
                     String comment = fieldComments.get(columnName.toUpperCase());
                     String filedDeclare = "";
-                    if (comment != null && comment.length() > 0) {
+                    if (comment != null && !comment.isEmpty()) {
                         filedDeclare += "\n/**\n" + " * " + comment + "\n" + " */\n";
                     }
-                    filedDeclare += "private " + columnType + " " + CharSequenceUtil.toCamelCase(columnName) + ";";
+                    String fieldName = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, columnName);
+                    filedDeclare += "private " + columnType + " " + fieldName + ";";
                     result.add(filedDeclare);
                 }
             } catch (RemoteException | SQLException e) {
