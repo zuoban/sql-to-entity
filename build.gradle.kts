@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "cn.leftsite"
-version = "1.4"
+version = "1.5"
 
 repositories {
     mavenCentral()
@@ -17,6 +17,7 @@ intellij {
     version.set("2023.1")
     type.set("IU") // Target IDE Platform
     plugins.set(listOf("com.intellij.database"))
+    updateSinceUntilBuild.set(false)
 }
 
 dependencies {
@@ -31,7 +32,6 @@ tasks {
 
     patchPluginXml {
         sinceBuild.set("213")
-        untilBuild.set("232.*")
     }
 
     signPlugin {
